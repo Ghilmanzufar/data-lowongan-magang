@@ -224,6 +224,14 @@
     `;
   }
 
+  function formatMajorBadge(majorStr) {
+    if (!majorStr) return 'Semua Jurusan IT';
+    const list = majorStr.split(',').map(m => m.trim()).filter(Boolean);
+    if (list.length <= 1) return list[0];
+    if (list.length === 2) return `${list[0]}, ${list[1]}`;
+    return `${list[0]}, ${list[1]} +${list.length - 2}`;
+  }
+
   function renderJobs(jobs) {
     el.jobsContainer.innerHTML = '';
 
@@ -293,7 +301,7 @@
         </div>
 
         <div class="major-badge-wrap">
-          <span class="major-badge" title="${escapeHtml(job.major)}">🎓 ${escapeHtml(job.major)}</span>
+          <span class="major-badge" title="${escapeHtml(job.major)}">🎓 ${escapeHtml(formatMajorBadge(job.major))}</span>
         </div>
 
         <div class="meta-row">

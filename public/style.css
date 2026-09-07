@@ -60,8 +60,10 @@
 
 html {
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
+  width: 100%;
   -webkit-text-size-adjust: 100%;
+  box-sizing: border-box;
 }
 
 body {
@@ -75,7 +77,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 a {
@@ -510,8 +514,11 @@ button {
    ========================================================================== */
 .jobs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: 1.25rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .job-card {
@@ -524,6 +531,11 @@ button {
   position: relative;
   transition: var(--transition);
   box-shadow: var(--shadow-card);
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .job-card:hover {
@@ -536,10 +548,12 @@ button {
 /* Card Header */
 .card-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .category-tag {
@@ -552,6 +566,7 @@ button {
   background: rgba(56, 189, 248, 0.1);
   color: var(--accent-cyan);
   border: 1px solid rgba(56, 189, 248, 0.2);
+  flex-shrink: 0;
 }
 
 .category-tag.software { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border-color: rgba(56, 189, 248, 0.25); }
@@ -565,6 +580,7 @@ button {
   font-size: 1.15rem;
   padding: 0.2rem;
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
 .card-bookmark-btn:hover {
@@ -585,6 +601,9 @@ button {
   margin-bottom: 0.35rem;
   cursor: pointer;
   transition: var(--transition);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .job-title:hover {
@@ -596,7 +615,9 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .company-name {
@@ -606,7 +627,8 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .company-chip-btn {
@@ -622,7 +644,7 @@ button {
   border-radius: var(--radius-sm);
   transition: var(--transition);
   white-space: nowrap;
-  shrink: 0;
+  flex-shrink: 0;
 }
 
 .company-chip-btn:hover {
@@ -633,21 +655,27 @@ button {
 }
 
 .major-badge-wrap {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .major-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.75rem;
   color: #93c5fd;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  padding: 0.25rem 0.6rem;
+  padding: 0.2rem 0.55rem;
   border-radius: var(--radius-sm);
   max-width: 100%;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 /* Card Metadata Rows */
@@ -655,16 +683,20 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem 0.85rem;
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .meta-item {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 /* Quota & Chance Meter */
@@ -672,18 +704,24 @@ button {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 0.75rem;
-  margin-top: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 0.65rem 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.85rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chance-stats-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.4rem;
   font-size: 0.775rem;
   font-family: var(--font-mono);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chance-label {
@@ -694,6 +732,7 @@ button {
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-sm);
   font-size: 0.725rem;
+  flex-shrink: 0;
 }
 
 .chance-label.high {
@@ -716,6 +755,7 @@ button {
 
 .ratio-text {
   color: var(--text-dim);
+  white-space: nowrap;
 }
 
 .progress-track {
@@ -724,6 +764,7 @@ button {
   background-color: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
+  min-width: 0;
 }
 
 .progress-fill {
@@ -740,7 +781,9 @@ button {
 .card-actions {
   margin-top: auto;
   display: flex;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .btn-detail {
@@ -1439,12 +1482,20 @@ button {
 @media (max-width: 768px) {
   /* Layout & Spacing */
   .site-header {
-    padding: 1rem 1rem 0.85rem;
-    padding-top: calc(0.85rem + env(safe-area-inset-top, 0px));
+    padding: 0.85rem 0.85rem 0.75rem;
+    padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .header-container {
-    gap: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 0.85rem;
   }
 
   .brand-title {
@@ -1462,11 +1513,13 @@ button {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .stat-box {
     min-width: 0;
     padding: 0.45rem 0.65rem;
+    box-sizing: border-box;
   }
 
   .stat-value {
@@ -1485,25 +1538,45 @@ button {
     min-height: 44px;
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+    box-sizing: border-box;
   }
 
   .main-container {
-    padding: 1rem 1rem 2.5rem;
+    padding: 0.75rem 0.75rem 2.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   /* Controls Panel */
   .controls-panel {
-    padding: 0.85rem;
-    gap: 0.85rem;
+    padding: 0.75rem;
+    gap: 0.75rem;
     border-radius: var(--radius-md);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .search-row {
     flex-direction: column;
     gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .search-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     min-height: 46px;
     font-size: 0.9rem;
     padding-left: 2.5rem;
@@ -1627,19 +1700,38 @@ button {
     font-size: 0.825rem;
   }
 
-  /* Jobs Grid: Single Column */
+  /* Jobs Grid: Single Column with guaranteed zero-overflow */
   .jobs-grid {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    gap: 0.75rem;
+    box-sizing: border-box;
   }
 
   .job-card {
-    padding: 1rem;
+    padding: 0.85rem 0.95rem;
     border-radius: var(--radius-md);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .card-top {
-    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .category-tag {
+    font-size: 0.675rem;
+    padding: 0.15rem 0.45rem;
   }
 
   .card-bookmark-btn {
@@ -1648,46 +1740,134 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: -0.5rem -0.5rem 0 0;
-    font-size: 1.35rem;
+    margin: -0.4rem -0.4rem 0 0;
+    font-size: 1.25rem;
+    flex-shrink: 0;
   }
 
   .job-title {
-    font-size: 1.05rem;
-    line-height: 1.35;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-width: 0;
   }
 
   .company-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.4rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
+    min-width: 0;
+    width: 100%;
   }
 
   .company-name {
     font-size: 0.825rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   .company-chip-btn {
-    min-height: 32px;
-    padding: 0.2rem 0.55rem;
+    min-height: 30px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .major-badge-wrap {
+    margin-bottom: 0.45rem;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .major-badge {
+    display: inline-flex;
+    align-items: center;
     font-size: 0.725rem;
+    padding: 0.15rem 0.45rem;
+    max-width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 
   .meta-row {
-    gap: 0.65rem;
-    font-size: 0.775rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.4rem;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .meta-item {
+    white-space: nowrap;
+    min-width: 0;
+    font-size: 0.75rem;
   }
 
   .chance-bar-container {
-    padding: 0.65rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.65rem;
+    margin-top: 0.35rem;
+    margin-bottom: 0.65rem;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .chance-stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.725rem;
+    margin-bottom: 0.3rem;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .chance-label {
+    font-size: 0.675rem;
+    padding: 0.1rem 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .ratio-text {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    height: 5px;
+    width: 100%;
+    min-width: 0;
   }
 
   .card-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0.5rem;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .btn-detail {
@@ -1695,8 +1875,9 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
-    padding: 0.5rem;
+    font-size: 0.825rem;
+    padding: 0.45rem;
+    box-sizing: border-box;
   }
 
   .btn-apply-direct {
@@ -1704,8 +1885,9 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
-    padding: 0.5rem;
+    font-size: 0.825rem;
+    padding: 0.45rem;
+    box-sizing: border-box;
   }
 
   /* --------------------------------------------------------------------------
