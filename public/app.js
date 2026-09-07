@@ -33,6 +33,8 @@
     // Header stats
     statTotalJobs: document.getElementById('stat-total-jobs'),
     statHighChance: document.getElementById('stat-high-chance'),
+    btnStatTotalJobs: document.getElementById('btn-stat-total-jobs'),
+    btnStatHighChance: document.getElementById('btn-stat-high-chance'),
     statBookmarksCount: document.getElementById('stat-bookmarks-count'),
     btnShowBookmarks: document.getElementById('btn-show-bookmarks'),
 
@@ -238,7 +240,11 @@
     // Results info text
     if (state.showBookmarksOnly) {
       el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan tersimpan`;
-      el.activeFilterBadge.textContent = 'Mode Favorit (Klik untuk lepas)';
+      el.activeFilterBadge.textContent = '⭐ Mode Favorit (Klik untuk lepas)';
+      el.activeFilterBadge.style.display = 'inline-block';
+    } else if (state.activeOpportunity === 'high') {
+      el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan dengan Peluang Sangat Besar (>= 50%)`;
+      el.activeFilterBadge.textContent = '🎯 Peluang Sangat Besar (Klik untuk lepas)';
       el.activeFilterBadge.style.display = 'inline-block';
     } else if (state.locationFilter === 'jakarta, bekasi') {
       el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan di Jakarta & Bekasi`;
@@ -251,6 +257,11 @@
     } else {
       el.resultsCountText.textContent = `Menampilkan ${jobs.length} dari ${state.jobs.length} lowongan Informatika (Nasional)`;
       el.activeFilterBadge.style.display = 'none';
+    }
+
+    // Sync high-chance stat button active state
+    if (el.btnStatHighChance) {
+      el.btnStatHighChance.classList.toggle('active', state.activeOpportunity === 'high');
     }
 
     if (jobs.length === 0) {
@@ -615,8 +626,62 @@
     el.btnShowBookmarks.addEventListener('click', () => {
       state.showBookmarksOnly = !state.showBookmarksOnly;
       el.btnShowBookmarks.classList.toggle('active', state.showBookmarksOnly);
+      if (state.showBookmarksOnly && state.activeOpportunity === 'high') {
+        state.activeOpportunity = 'all';
+        el.filterOpportunity.value = 'all';
+        if (el.btnStatHighChance) el.btnStatHighChance.classList.remove('active');
+      }
       applyFiltersAndRender();
     });
+
+    // Peluang Sangat Besar stat button click
+    if (el.btnStatHighChance) {
+      el.btnStatHighChance.addEventListener('click', () => {
+        if (state.activeOpportunity === 'high') {
+          // Toggle off -> show all
+          state.activeOpportunity = 'all';
+          el.filterOpportunity.value = 'all';
+          el.btnStatHighChance.classList.remove('active');
+          showToast('Menampilkan semua status peluang');
+        } else {
+          // Toggle on -> filter only high
+          if (state.showBookmarksOnly) {
+            state.showBookmarksOnly = false;
+            el.btnShowBookmarks.classList.remove('active');
+          }
+          state.activeOpportunity = 'high';
+          el.filterOpportunity.value = 'high';
+          el.btnStatHighChance.classList.add('active');
+
+          // If current location filter would result in 0 jobs, auto-switch to national ('all')
+          if (state.locationFilter && state.locationFilter !== 'all') {
+            const locTerms = state.locationFilter.toLowerCase().split(/[,|]/).map(t => t.trim()).filter(Boolean);
+            const hasMatchesInLoc = state.jobs.some(j => {
+              if (j.opportunityRate < 50) return false;
+              const jLoc = (j.location || '').toLowerCase();
+              return locTerms.some(term => jLoc.includes(term));
+            });
+
+            if (!hasMatchesInLoc) {
+              state.locationFilter = 'all';
+              if (el.filterLocationSelect) el.filterLocationSelect.value = 'all';
+              el.filterLocation.style.display = 'none';
+              el.filterLocation.value = '';
+            }
+          }
+          showToast('Menyaring lowongan Peluang Sangat Besar (>= 50%)');
+        }
+        applyFiltersAndRender();
+      });
+    }
+
+    // Lowongan IT Aktif stat button click -> reset to all
+    if (el.btnStatTotalJobs) {
+      el.btnStatTotalJobs.addEventListener('click', () => {
+        resetAllFilters();
+        showToast('Menampilkan seluruh lowongan IT');
+      });
+    }
 
     // Search Input with debounce
     let debounceTimer = null;
@@ -651,6 +716,9 @@
 
     el.filterOpportunity.addEventListener('change', (e) => {
       state.activeOpportunity = e.target.value;
+      if (el.btnStatHighChance) {
+        el.btnStatHighChance.classList.toggle('active', state.activeOpportunity === 'high');
+      }
       applyFiltersAndRender();
     });
 
@@ -680,11 +748,16 @@
       }, 300);
     });
 
-    // Active filter badge click to reset location or bookmarks
+    // Active filter badge click to reset location, opportunity, or bookmarks
     el.activeFilterBadge.addEventListener('click', () => {
       if (state.showBookmarksOnly) {
         state.showBookmarksOnly = false;
         el.btnShowBookmarks.classList.remove('active');
+      } else if (state.activeOpportunity === 'high') {
+        state.activeOpportunity = 'all';
+        el.filterOpportunity.value = 'all';
+        if (el.btnStatHighChance) el.btnStatHighChance.classList.remove('active');
+        showToast('Filter peluang dinonaktifkan');
       } else {
         state.locationFilter = 'all';
         if (el.filterLocationSelect) el.filterLocationSelect.value = 'all';
@@ -719,6 +792,7 @@
       el.filterLocation.value = '';
       el.sortSelect.value = 'opportunity-desc';
       el.btnShowBookmarks.classList.remove('active');
+      if (el.btnStatHighChance) el.btnStatHighChance.classList.remove('active');
 
       el.pills.forEach(p => {
         const isAll = p.getAttribute('data-category') === 'all';
