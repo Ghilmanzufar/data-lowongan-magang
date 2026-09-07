@@ -1,0 +1,21 @@
+{
+  "name": "maganghub-it-tracker",
+  "version": "1.0.0",
+  "description": "MagangHub Kemnaker IT & Informatika Tracker - Khusus Jurusan Komputasi & Informatika",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "crawl": "node build_db.js",
+    "sync": "node build_db.js"
+  },
+  "keywords": [
+    "maganghub",
+    "kemnaker",
+    "informatika",
+    "internship",
+    "tracker"
+  ],
+  "author": "",
+  "license": "MIT"
+}

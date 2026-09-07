@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MagangHub Kemnaker — Tracker Khusus Jurusan Informatika & Komputasi</title>
+  <meta name="description" content="Katalog lowongan Program Pemagangan Kemnaker yang disaring khusus untuk mahasiswa dan lulusan rumpun Teknik Informatika, Ilmu Komputer, Sistem Informasi, dan RPL.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand-area">
+        <div class="brand-badge">
+          <span class="status-dot live"></span>
+          <span>Kemnaker RI</span>
+        </div>
+        <h1 class="brand-title">
+          MagangHub <span class="accent-text">IT Tracker</span>
+        </h1>
+        <p class="brand-subtitle">
+          Saringan lowongan resmi Kemnaker khusus rumpun <strong>Teknik Informatika, Ilmu Komputer, Sistem Informasi &amp; RPL</strong>.
+        </p>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-box">
+          <span class="stat-value" id="stat-total-jobs">-</span>
+          <span class="stat-label">Lowongan IT Aktif</span>
+        </div>
+        <div class="stat-box highlight">
+          <span class="stat-value" id="stat-high-chance">-</span>
+          <span class="stat-label">Peluang Sangat Besar</span>
+        </div>
+        <button class="bookmark-nav-btn" id="btn-show-bookmarks" aria-label="Lihat bookmark lowongan tersimpan">
+          <span class="bookmark-icon">⭐</span>
+          <span class="bookmark-text">Tersimpan</span>
+          <span class="bookmark-count" id="stat-bookmarks-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-container">
+
+    <!-- Search & Filter Controls -->
+    <section class="controls-panel" aria-label="Panel Pencarian dan Penyaringan">
+      <!-- Search Bar -->
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Cari posisi, instansi (contoh: Programmer, Kominfo, Web, Jakarta)..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="search-clear-btn" class="clear-btn" aria-label="Hapus pencarian" style="display: none;">✕</button>
+        </div>
+
+        <button id="btn-refresh-data" class="refresh-btn" title="Segarkan data langsung dari portal Kemnaker">
+          <span class="refresh-icon">🔄</span>
+          <span>Perbarui Data</span>
+        </button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills-row" role="tablist" aria-label="Kategori Bidang IT">
+        <button class="pill-btn active" data-category="all" role="tab" aria-selected="true">
+          <span>Semua IT</span>
+          <span class="pill-count" id="count-all">0</span>
+        </button>
+        <button class="pill-btn" data-category="software" role="tab" aria-selected="false">
+          <span class="pill-emoji">💻</span>
+          <span>Software &amp; Web Dev</span>
+          <span class="pill-count" id="count-software">0</span>
+        </button>
+        <button class="pill-btn" data-category="data" role="tab" aria-selected="false">
+          <span class="pill-emoji">📊</span>
+          <span>Data &amp; AI</span>
+          <span class="pill-count" id="count-data">0</span>
+        </button>
+        <button class="pill-btn" data-category="network" role="tab" aria-selected="false">
+          <span class="pill-emoji">🛡️</span>
+          <span>Jaringan &amp; Cloud</span>
+          <span class="pill-count" id="count-network">0</span>
+        </button>
+        <button class="pill-btn" data-category="support" role="tab" aria-selected="false">
+          <span class="pill-emoji">🛠️</span>
+          <span>IT Support &amp; Ops</span>
+          <span class="pill-count" id="count-support">0</span>
+        </button>
+        <button class="pill-btn" data-category="uiux" role="tab" aria-selected="false">
+          <span class="pill-emoji">🎨</span>
+          <span>UI/UX &amp; Produk</span>
+          <span class="pill-count" id="count-uiux">0</span>
+        </button>
+      </div>
+
+      <!-- Secondary Filters Bar -->
+      <div class="secondary-filters-row">
+        <div class="filter-group">
+          <label for="filter-degree">Jenjang:</label>
+          <select id="filter-degree" class="custom-select">
+            <option value="all">Semua Jenjang</option>
+            <option value="sarjana">Sarjana (S1 / D4)</option>
+            <option value="diploma">Diploma (D3)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-opportunity">Status Peluang:</label>
+          <select id="filter-opportunity" class="custom-select">
+            <option value="all">Semua Peluang</option>
+            <option value="high">🟢 Peluang Sangat Besar (&gt;= 50%)</option>
+            <option value="medium">🟡 Peluang Sedang (20% - 49%)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-location-select">Lokasi:</label>
+          <select id="filter-location-select" class="custom-select">
+            <option value="jakarta, bekasi" selected>📍 Jakarta &amp; Bekasi (Default)</option>
+            <option value="all">🌐 Semua Lokasi (Nasional)</option>
+            <option value="jakarta">DKI Jakarta</option>
+            <option value="bekasi">Bekasi (Kota &amp; Kab)</option>
+            <option value="custom">🔍 Ketik Kota Lain...</option>
+          </select>
+          <input 
+            type="text" 
+            id="filter-location" 
+            class="custom-select filter-text-input" 
+            placeholder="Ketik kota/kab..."
+            style="display: none;"
+          >
+        </div>
+
+        <button id="btn-reset-filters" class="reset-filters-btn">
+          Reset Filter
+        </button>
+      </div>
+    </section>
+
+    <!-- Active Filter Summary & Result Count -->
+    <div class="results-header">
+      <div class="results-info">
+        <span id="results-count-text">Memuat lowongan...</span>
+        <span id="active-filter-badge" class="active-tag" style="display: none;"></span>
+      </div>
+      <div class="sort-selector">
+        <label for="sort-select">Urutan:</label>
+        <select id="sort-select" class="custom-select compact">
+          <option value="opportunity-desc">Peluang Tertinggi</option>
+          <option value="applicants-asc">Pelamar Paling Sedikit</option>
+          <option value="quota-desc">Kuota Paling Banyak</option>
+          <option value="title-asc">Nama Posisi (A-Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Job Cards Grid -->
+    <section class="jobs-grid" id="jobs-container" aria-live="polite">
+      <!-- Loading Skeleton Cards will be rendered here -->
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Menghubungkan ke portal MagangHub Kemnaker &amp; menyaring jurusan IT...</p>
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <div class="empty-icon">📂</div>
+      <h3>Tidak Ada Lowongan yang Cocok</h3>
+      <p id="empty-message">Coba ubah kata kunci pencarian atau reset filter untuk menampilkan lowongan lainnya.</p>
+      <button id="empty-reset-btn" class="btn-primary">Kembalikan Semua Lowongan</button>
+    </div>
+
+  </main>
+
+  <!-- Detail Modal / Slide-over Drawer -->
+  <div id="job-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-category-badge" id="modal-category">Software &amp; Web</div>
+        <button id="modal-close-btn" class="modal-close" aria-label="Tutup detail lowongan">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <h2 id="modal-title" class="modal-job-title">Posisi Lowongan</h2>
+        <p id="modal-company" class="modal-company-name">Nama Instansi / Perusahaan</p>
+
+        <div class="modal-key-stats">
+          <div class="key-stat">
+            <span class="key-stat-label">Kuota Formasi</span>
+            <span class="key-stat-val" id="modal-quota">-</span>
+          </div>
+          <div class="key-stat">
+            <span class="key-stat-label">Pelamar Terdaftar</span>
+            <span class="key-stat-val" id="modal-applicants">-</span>
+          </div>
+          <div class="key-stat">
+            <span class="key-stat-label">Tingkat Peluang</span>
+            <span class="key-stat-val highlight" id="modal-opportunity">-</span>
+          </div>
+        </div>
+
+        <div class="modal-info-list">
+          <div class="info-row">
+            <span class="info-icon">🎓</span>
+            <div class="info-content">
+              <strong>Jurusan yang Diterima:</strong>
+              <p id="modal-majors" class="modal-majors-text">Teknik Informatika, Ilmu Komputer, Sistem Informasi</p>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-icon">📍</span>
+            <div class="info-content">
+              <strong>Lokasi Penempatan:</strong>
+              <p id="modal-location">Kota Administrasi Jakarta Pusat</p>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-icon">📜</span>
+            <div class="info-content">
+              <strong>Jenjang Pendidikan:</strong>
+              <p id="modal-degree">Sarjana (S1 / D4)</p>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-icon">📅</span>
+            <div class="info-content">
+              <strong>Hari &amp; Jam Kerja:</strong>
+              <p id="modal-schedule">5 hari/minggu</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Deskripsi Lowongan -->
+        <div class="modal-section-card">
+          <div class="section-card-header">
+            <span class="section-badge-icon">📋</span>
+            <h3 class="section-card-title">Deskripsi Lowongan</h3>
+          </div>
+          <div id="modal-job-description" class="job-description-content">
+            Memuat rincian deskripsi tugas...
+          </div>
+        </div>
+
+        <!-- 2. Skill yang Bakal Kamu Dapat -->
+        <div class="modal-section-card">
+          <div class="section-card-header">
+            <span class="section-badge-icon">⚡</span>
+            <h3 class="section-card-title">Skill yang Bakal Kamu Dapat</h3>
+          </div>
+          <div id="modal-skills-container" class="skills-modules-grid">
+            <div class="skill-loading-placeholder">Memuat kurikulum &amp; kompetensi magang...</div>
+          </div>
+        </div>
+
+        <!-- 3. Alur Lamaran -->
+        <div class="modal-section-card">
+          <div class="section-card-header">
+            <span class="section-badge-icon">🗺️</span>
+            <h3 class="section-card-title">Alur Lamaran</h3>
+          </div>
+          <div id="modal-timeline-container" class="timeline-stepper">
+            <!-- Timeline steps rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- 4. Company Profile & Direct Website Box -->
+        <div class="company-detail-card">
+          <div class="company-card-header">
+            <div class="company-brand-info">
+              <span class="company-icon">🏢</span>
+              <div>
+                <span class="company-tag">Instansi / Perusahaan</span>
+                <h4 id="modal-company-title" class="company-title-text">Nama Perusahaan</h4>
+              </div>
+            </div>
+            <a id="modal-company-website-link" href="#" target="_blank" rel="noopener noreferrer" class="company-website-btn" title="Buka website resmi instansi/perusahaan">
+              <span id="modal-website-btn-text">🌐 Website Perusahaan</span>
+              <span class="ext-arrow">↗</span>
+            </a>
+          </div>
+
+          <div id="company-extra-details" class="company-extra-info">
+            <div class="company-meta-item" id="comp-address-row">
+              <span class="meta-label">📍 Lokasi/Alamat:</span>
+              <span id="modal-company-address" class="meta-val">Memuat info instansi...</span>
+            </div>
+            <div class="company-meta-item" id="comp-contact-row" style="display: none;">
+              <span class="meta-label">✉️ Kontak Resmi:</span>
+              <span id="modal-company-contact" class="meta-val">-</span>
+            </div>
+            <div class="company-actions-row" id="comp-organizer-row" style="display: none;">
+              <a id="modal-organizer-link" href="#" target="_blank" rel="noopener noreferrer" class="organizer-kemnaker-link">
+                <span>🏛️ Buka Halaman Profil Penyelenggara di Kemnaker</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="modal-bookmark-btn" class="btn-secondary">
+          <span id="modal-bookmark-icon">⭐</span>
+          <span id="modal-bookmark-label">Simpan ke Favorit</span>
+        </button>
+        <a id="modal-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary apply-action">
+          <span>Lamar di Portal Kemnaker</span>
+          <span class="external-icon">↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>Data bersumber resmi dari <a href="https://maganghub.kemnaker.go.id/magang-nasional/lowongan" target="_blank" rel="noopener noreferrer">Portal MagangHub Kemnaker RI</a>.</p>
+      <p class="footer-note">Disaring secara otomatis untuk mahasiswa &amp; lulusan rumpun teknologi komputasi.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
