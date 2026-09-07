@@ -58,6 +58,12 @@
   padding: 0;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--bg-body);
   color: var(--text-main);
@@ -65,13 +71,26 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Touch feedback for tactile responsive feel */
+button:active,
+.pill-btn:active,
+.btn-detail:active,
+.btn-apply-direct:active,
+.company-chip-btn:active,
+.bookmark-nav-btn:active {
+  transform: scale(0.97);
 }
 
 button, input, select {
@@ -1366,58 +1385,558 @@ button {
 }
 
 /* ==========================================================================
-   Responsive Breakpoints
+   Responsive Architecture (Tablets & Smartphones)
+   Built according to Antislop Layout-Mobile principles:
+   - Dedicated mobile states, not squeezed desktop
+   - Touch targets >= 44px
+   - No horizontal scroll leakage
+   - Bottom sheet drawer for mobile details
    ========================================================================== */
-@media (max-width: 900px) {
+
+/* --------------------------------------------------------------------------
+   1. Tablets & Medium Screens (769px - 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
   .header-container {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 1.25rem;
   }
 
   .header-stats {
-    width: 100%;
+    display: flex;
     justify-content: flex-start;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .stat-box {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .bookmark-nav-btn {
+    min-height: 44px;
   }
 
   .jobs-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .controls-panel {
+    padding: 1rem;
+  }
+
+  .secondary-filters-row {
+    gap: 0.75rem;
   }
 }
 
-@media (max-width: 600px) {
+/* --------------------------------------------------------------------------
+   2. Smartphones & Small Tablets (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Layout & Spacing */
+  .site-header {
+    padding: 1rem 1rem 0.85rem;
+    padding-top: calc(0.85rem + env(safe-area-inset-top, 0px));
+  }
+
+  .header-container {
+    gap: 1rem;
+  }
+
+  .brand-title {
+    font-size: clamp(1.25rem, 5vw, 1.45rem);
+  }
+
+  .brand-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  /* Header stats: 2-column grid + full width bookmark button */
+  .header-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .stat-box {
+    min-width: 0;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .stat-value {
+    font-size: 1.15rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    text-align: center;
+  }
+
+  .bookmark-nav-btn {
+    grid-column: span 2;
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .main-container {
+    padding: 1rem 1rem 2.5rem;
+  }
+
+  /* Controls Panel */
+  .controls-panel {
+    padding: 0.85rem;
+    gap: 0.85rem;
+    border-radius: var(--radius-md);
+  }
+
   .search-row {
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-input {
+    min-height: 46px;
+    font-size: 0.9rem;
+    padding-left: 2.5rem;
+    padding-right: 2.2rem;
+  }
+
+  .search-icon {
+    left: 0.85rem;
   }
 
   .refresh-btn {
     width: 100%;
+    min-height: 44px;
     justify-content: center;
+    font-size: 0.85rem;
   }
 
+  /* Category Pills: Smooth Horizontal Touch-Scroll List */
+  .category-pills-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.1rem 0 0.4rem;
+    gap: 0.45rem;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  }
+
+  .category-pills-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pill-btn {
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.825rem;
+    white-space: nowrap;
+  }
+
+  /* Secondary Filters: Full-width stacked */
   .secondary-filters-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
   }
 
   .filter-group {
-    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .filter-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .custom-select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.875rem;
   }
 
   .filter-text-input {
-    width: 60%;
+    width: 100%;
+    min-height: 44px;
   }
 
   .reset-filters-btn {
-    margin-left: 0;
+    width: 100%;
     text-align: center;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+  }
+
+  /* Results Header */
+  .results-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .results-info {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.825rem;
+  }
+
+  .sort-selector {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sort-selector label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+
+  .custom-select.compact {
+    flex: 1;
+    min-height: 42px;
+    margin-left: 0.5rem;
+    font-size: 0.825rem;
+  }
+
+  /* Jobs Grid: Single Column */
+  .jobs-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .job-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .card-top {
+    margin-bottom: 0.4rem;
+  }
+
+  .card-bookmark-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -0.5rem -0.5rem 0 0;
+    font-size: 1.35rem;
+  }
+
+  .job-title {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .company-row {
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .company-name {
+    font-size: 0.825rem;
+  }
+
+  .company-chip-btn {
+    min-height: 32px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.725rem;
+  }
+
+  .meta-row {
+    gap: 0.65rem;
+    font-size: 0.775rem;
+  }
+
+  .chance-bar-container {
+    padding: 0.65rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-detail {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .btn-apply-direct {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  /* --------------------------------------------------------------------------
+     Detail Modal: Mobile Bottom-Sheet Drawer
+     -------------------------------------------------------------------------- */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90dvh;
+    border-radius: 20px 20px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-card::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 8px auto -4px;
+    flex-shrink: 0;
+  }
+
+  .modal-backdrop.show .modal-card {
+    transform: translateY(0);
+  }
+
+  .modal-header {
+    padding: 0.75rem 1rem;
+    position: sticky;
+    top: 0;
+    background: var(--bg-surface);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .modal-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    margin: -0.4rem -0.4rem -0.4rem 0;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    gap: 1rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-job-title {
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+
+  .modal-company-name {
+    font-size: 0.875rem;
+    margin-top: -0.65rem;
+  }
+
+  .modal-key-stats {
+    padding: 0.75rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .key-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .key-stat-val {
+    font-size: 1.05rem;
+  }
+
+  .info-row {
+    gap: 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .info-icon {
+    font-size: 1.1rem;
+  }
+
+  .modal-section-card {
+    padding: 0.9rem;
+    gap: 0.65rem;
+  }
+
+  .section-card-title {
+    font-size: 0.875rem;
+  }
+
+  .job-description-content {
+    font-size: 0.825rem;
+    line-height: 1.6;
+  }
+
+  .skill-module-card {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .skill-module-top {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .skill-badges {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .timeline-step-item {
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+  }
+
+  .company-detail-card {
+    padding: 0.9rem;
+    gap: 0.75rem;
+  }
+
+  .company-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .company-website-btn {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
   }
 
   .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    z-index: 10;
+    border-top: 1px solid var(--border-subtle);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    display: flex;
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-footer .btn-secondary {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+  }
+
+  .modal-footer .btn-primary {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  /* Toast Notification */
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    font-size: 0.825rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Ultra-Narrow Devices (<= 380px, e.g. Galaxy Z Fold Cover, iPhone SE)
+   -------------------------------------------------------------------------- */
+@media (max-width: 380px) {
+  .site-header {
+    padding: 0.75rem 0.75rem;
+  }
+
+  .main-container {
+    padding: 0.75rem 0.75rem 2rem;
+  }
+
+  .brand-title {
+    font-size: 1.2rem;
+  }
+
+  .header-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .bookmark-nav-btn {
+    grid-column: span 1;
+  }
+
+  .card-actions {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .modal-key-stats {
+    grid-template-columns: 1fr;
+    text-align: left;
+    gap: 0.5rem;
+  }
+
+  .key-stat {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .key-stat-label {
+    margin-bottom: 0;
   }
 }

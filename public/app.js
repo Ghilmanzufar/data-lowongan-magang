@@ -367,6 +367,11 @@
   // --- Modal Logic ---
   function openModal(job) {
     state.selectedJob = job;
+    const modalCardEl = el.jobModal.querySelector('.modal-card');
+    if (modalCardEl) modalCardEl.scrollTop = 0;
+    const modalBodyEl = el.jobModal.querySelector('.modal-body');
+    if (modalBodyEl) modalBodyEl.scrollTop = 0;
+
     el.modalTitle.textContent = job.title;
     el.modalCompany.textContent = job.company;
     el.modalCategory.textContent = getCategoryLabel(job.category);
