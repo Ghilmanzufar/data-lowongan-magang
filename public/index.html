@@ -147,6 +147,15 @@
           >
         </div>
 
+        <div class="filter-group">
+          <label for="filter-community">Catatan Khusus:</label>
+          <select id="filter-community" class="custom-select">
+            <option value="all">Semua Instansi</option>
+            <option value="clean">Hanya Tanpa Catatan Kendala</option>
+            <option value="flagged">⚠️ Ada Catatan Komunitas</option>
+          </select>
+        </div>
+
         <button id="btn-reset-filters" class="reset-filters-btn">
           Reset Filter
         </button>
@@ -198,6 +207,22 @@
       </div>
 
       <div class="modal-body">
+        <div id="modal-community-alert" class="modal-community-alert" style="display: none;">
+          <div class="community-alert-header">
+            <span class="community-alert-icon" aria-hidden="true">⚠️</span>
+            <div>
+              <span class="community-alert-badge" id="modal-community-cat">Catatan Komunitas</span>
+              <h4 class="community-alert-title">Perhatian: Instansi Memiliki Catatan Rekrutmen</h4>
+            </div>
+          </div>
+          <p id="modal-community-text" class="community-alert-desc"></p>
+          <div class="community-alert-footer">
+            <button id="modal-btn-open-redflag-detail" class="btn-community-action" type="button">
+              Lihat Rincian Laporan Komunitas
+            </button>
+          </div>
+        </div>
+
         <h2 id="modal-title" class="modal-job-title">Posisi Lowongan</h2>
         <p id="modal-company" class="modal-company-name">Nama Instansi / Perusahaan</p>
 
@@ -327,6 +352,58 @@
           <span>Lamar di Portal Kemnaker</span>
           <span class="external-icon">↗</span>
         </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Redflag / Community Report Modal -->
+  <div id="redflag-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="redflag-modal-company">
+    <div class="modal-card redflag-modal-card">
+      <div class="modal-header redflag-modal-header">
+        <div class="redflag-header-tag">
+          <span class="redflag-header-icon" aria-hidden="true">⚠️</span>
+          <span>Catatan Komunitas &amp; Rekrutmen</span>
+        </div>
+        <button id="redflag-modal-close-btn" class="modal-close" aria-label="Tutup catatan komunitas" type="button">✕</button>
+      </div>
+
+      <div class="modal-body redflag-modal-body">
+        <div class="redflag-company-hero">
+          <span class="redflag-category-pill" id="redflag-category-pill">Kategori Kendala</span>
+          <h2 id="redflag-modal-company" class="redflag-company-heading">Nama Instansi</h2>
+          <p class="redflag-disclaimer">
+            Informasi ini dihimpun dari laporan pengalaman peserta seleksi Program Pemagangan (Batch 1 2026) sebagai pertimbangan objektif sebelum Anda mengajukan lamaran.
+          </p>
+        </div>
+
+        <div class="redflag-info-card">
+          <div class="redflag-section-title">
+            <span class="redflag-badge-icon" aria-hidden="true">📢</span>
+            <h3>Rincian Kendala yang Dilaporkan</h3>
+          </div>
+          <p id="redflag-modal-detail" class="redflag-detail-text">
+            Rincian catatan kendala rekrutmen.
+          </p>
+        </div>
+
+        <div class="redflag-advice-card">
+          <div class="redflag-section-title">
+            <span class="redflag-badge-icon" aria-hidden="true">💡</span>
+            <h3>Saran untuk Pelamar</h3>
+          </div>
+          <p id="redflag-modal-advice" class="redflag-advice-text">
+            Saran persiapan bagi calon pelamar.
+          </p>
+        </div>
+
+        <div class="redflag-actions-row">
+          <button id="redflag-btn-filter-clean" class="btn-filter-clean-shortcut" type="button">
+            Sembunyikan Lowongan dengan Catatan
+          </button>
+          <button id="redflag-btn-close-action" class="btn-redflag-dismiss" type="button">
+            Mengerti, Kembali ke Katalog
+          </button>
+        </div>
       </div>
     </div>
   </div>

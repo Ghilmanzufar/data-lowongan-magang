@@ -3,6 +3,59 @@ const fs = require('fs');
 const path = require('path');
 
 const DB_FILE = path.join(__dirname, '..', 'data', 'jobs.json');
+const REDFLAGS_FILE = path.join(__dirname, '..', 'data', 'redflags.json');
+
+let redflagsCache = null;
+function loadRedflags() {
+  try {
+    if (fs.existsSync(REDFLAGS_FILE)) {
+      const content = fs.readFileSync(REDFLAGS_FILE, 'utf8');
+      redflagsCache = JSON.parse(content);
+    }
+  } catch (err) {
+    console.error('[MagangHub Redflag DB] Gagal membaca data/redflags.json:', err);
+    redflagsCache = [];
+  }
+}
+loadRedflags();
+
+function matchJobRedflag(job) {
+  if (!redflagsCache || !Array.isArray(redflagsCache)) return null;
+  const cName = (job.company || '').toLowerCase();
+  const cLoc = (job.location || '').toLowerCase();
+
+  for (const rf of redflagsCache) {
+    let matchesTerm = false;
+    for (const term of rf.matchTerms) {
+      if (term.length <= 4) {
+        if (new RegExp('\\b' + term + '\\b', 'i').test(cName)) {
+          matchesTerm = true;
+          break;
+        }
+      } else if (cName.includes(term.toLowerCase())) {
+        matchesTerm = true;
+        break;
+      }
+    }
+
+    if (matchesTerm) {
+      if (rf.locationConstraint) {
+        if (!cLoc.includes(rf.locationConstraint.toLowerCase()) && !cName.includes(rf.locationConstraint.toLowerCase())) {
+          continue;
+        }
+      }
+      return {
+        id: rf.id,
+        name: rf.name,
+        category: rf.category,
+        statusBadge: rf.statusBadge,
+        reportDetail: rf.reportDetail,
+        advice: rf.advice
+      };
+    }
+  }
+  return null;
+}
 
 let jobsCache = null;
 let lastFetchTime = 0;
@@ -487,11 +540,13 @@ module.exports = async function handler(req, res) {
   const category = urlObj.searchParams.get('category') || 'all';
   const degree = urlObj.searchParams.get('degree') || 'all';
   const opportunity = urlObj.searchParams.get('opportunity') || 'all';
+  const community = urlObj.searchParams.get('community') || 'all';
   const q = (urlObj.searchParams.get('q') || '').trim().toLowerCase();
 
   let filtered = [...(jobsCache || [])].map(j => ({
     ...j,
-    companyWebsite: `https://www.google.com/search?q=${encodeURIComponent(j.company + ' official website')}`
+    companyWebsite: `https://www.google.com/search?q=${encodeURIComponent(j.company + ' official website')}`,
+    redflag: matchJobRedflag(j)
   }));
 
   if (category !== 'all') {
@@ -506,6 +561,12 @@ module.exports = async function handler(req, res) {
     filtered = filtered.filter(j => j.opportunityRate >= 50);
   } else if (opportunity === 'medium') {
     filtered = filtered.filter(j => j.opportunityRate >= 20 && j.opportunityRate < 50);
+  }
+
+  if (community === 'clean') {
+    filtered = filtered.filter(j => !j.redflag);
+  } else if (community === 'flagged') {
+    filtered = filtered.filter(j => Boolean(j.redflag));
   }
 
   if (q) {
@@ -525,7 +586,8 @@ module.exports = async function handler(req, res) {
     data: allList.filter(j => j.category === 'data').length,
     network: allList.filter(j => j.category === 'network').length,
     support: allList.filter(j => j.category === 'support').length,
-    uiux: allList.filter(j => j.category === 'uiux').length
+    uiux: allList.filter(j => j.category === 'uiux').length,
+    flagged: allList.filter(j => matchJobRedflag(j)).length
   };
 
   res.setHeader('Content-Type', 'application/json');

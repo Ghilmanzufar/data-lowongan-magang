@@ -14,6 +14,7 @@
     activeDegree: 'all',
     activeOpportunity: 'all',
     locationFilter: 'jakarta, bekasi', // Default filter: Jakarta & Bekasi
+    communityFilter: 'all', // 'all', 'clean', 'flagged'
     searchQuery: '',
     sortBy: 'opportunity-desc',
     showBookmarksOnly: false,
@@ -55,6 +56,7 @@
     filterOpportunity: document.getElementById('filter-opportunity'),
     filterLocationSelect: document.getElementById('filter-location-select'),
     filterLocation: document.getElementById('filter-location'),
+    filterCommunity: document.getElementById('filter-community'),
     btnResetFilters: document.getElementById('btn-reset-filters'),
     sortSelect: document.getElementById('sort-select'),
 
@@ -76,6 +78,22 @@
     modalBookmarkLabel: document.getElementById('modal-bookmark-label'),
     modalApplyLink: document.getElementById('modal-apply-link'),
 
+    // Community Alert inside Job Modal
+    modalCommunityAlert: document.getElementById('modal-community-alert'),
+    modalCommunityCat: document.getElementById('modal-community-cat'),
+    modalCommunityText: document.getElementById('modal-community-text'),
+    modalBtnOpenRedflagDetail: document.getElementById('modal-btn-open-redflag-detail'),
+
+    // Dedicated Redflag Modal
+    redflagModal: document.getElementById('redflag-modal'),
+    redflagModalCloseBtn: document.getElementById('redflag-modal-close-btn'),
+    redflagCategoryPill: document.getElementById('redflag-category-pill'),
+    redflagModalCompany: document.getElementById('redflag-modal-company'),
+    redflagModalDetail: document.getElementById('redflag-modal-detail'),
+    redflagModalAdvice: document.getElementById('redflag-modal-advice'),
+    redflagBtnFilterClean: document.getElementById('redflag-btn-filter-clean'),
+    redflagBtnCloseAction: document.getElementById('redflag-btn-close-action'),
+
     // Company Modal elements
     modalCompanyTitle: document.getElementById('modal-company-title'),
     modalCompanyWebsiteLink: document.getElementById('modal-company-website-link'),
@@ -95,6 +113,70 @@
     toast: document.getElementById('toast')
   };
 
+  // --- Community Redflag Rules (Fallback & Client Matcher) ---
+  const REDFLAGS_RULES = [
+    { id: 'bkn-jaktim', name: 'Badan Kepegawaian Negara (BKN)', matchTerms: ['badan kepegawaian negara', 'bkn'], loc: 'jakarta timur', category: 'Tidak Ada Komunikasi (RO)', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta seleksi Batch 1 melaporkan tidak ada komunikasi atau tindak lanjut (reach out) dari pihak instansi setelah lamaran diajukan.', advice: 'Jika Anda sangat berminat melamar di BKN, pastikan Anda juga menyiapkan alternatif pilihan instansi lain untuk mengamankan kuota pendaftaran Anda.' },
+    { id: 'cimb-niaga', name: 'Bank CIMB Niaga', matchTerms: ['cimb niaga', 'bank cimb niaga'], category: 'Tidak Ada Komunikasi (RO)', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta seleksi Batch 1 melaporkan tidak menerima kabar atau tindak lanjut (reach out) setelah proses pengiriman lamaran di portal.', advice: 'Pantau secara berkala email dan portal rekrutmen resmi CIMB Niaga jika Anda memutuskan untuk mendaftar.' },
+    { id: 'dana-purna-investama', name: 'PT Dana Purna Investama', matchTerms: ['dana purna investama'], category: 'Tidak Ada Komunikasi & Ghosting', statusBadge: 'Catatan Komunitas', reportDetail: 'Tercatat dalam laporan peserta seleksi Batch 1 terkait tidak adanya reach out serta tidak adanya kejelasan pengumuman kelulusan setelah pengiriman berkas.', advice: 'Siapkan portofolio yang relevan dan pertimbangkan instansi cadangan sebelum memilih posisi ini.' },
+    { id: 'bakrie-autoparts', name: 'Bakrie Autoparts', matchTerms: ['bakrie autoparts'], loc: 'bekasi', category: 'Ghosting Seleksi', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan tidak memperoleh kabar kelulusan setelah tahap seleksi berkas atau wawancara.', advice: 'Bila Anda mengikuti proses seleksi di sini, pastikan memiliki cadangan lamaran aktif lainnya.' },
+    { id: 'privy', name: 'PT Privy Identitas Digital (Privy)', matchTerms: ['privy', 'pt privy identitas digital'], category: 'Ghosting Seleksi', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan tidak ada kabar kepastian hasil seleksi setelah tahap interview diselesaikan.', advice: 'Bila Anda telah menyelesaikan wawancara, disarankan menanyakan status tindak lanjut secara profesional ke kontak rekruter.' },
+    { id: 'blibli-global-digital-niaga', name: 'Global Digital Niaga (Blibli)', matchTerms: ['global digital niaga', 'blibli'], category: 'Ghosting & Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta melaporkan tidak adanya kejelasan kabar pasca interview serta terdapat laporan ketidaksesuaian jumlah kuota penerimaan aktual.', advice: 'Proses seleksi di industri e-commerce sangat kompetitif. Pastikan Anda memiliki opsi pilihan lain yang seimbang.' },
+    { id: 'daimler', name: 'Daimler Commercial Vehicles Manufacturing Indonesia', matchTerms: ['daimler', 'diamler'], category: 'Ghosting Seleksi', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta seleksi Batch 1 melaporkan tidak mendapatkan kejelasan kabar kelulusan setelah proses seleksi.', advice: 'Pastikan berkas kualifikasi teknis Anda lengkap dan pertimbangkan opsi lowongan serupa di wilayah sekitarnya.' },
+    { id: 'hasnur', name: 'Yayasan Hasnur Centre / Hasnur Group', matchTerms: ['yayasan hasnur centre', 'hasnur group indonesia'], category: 'Ghosting Seleksi', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan proses rekrutmen terhenti tanpa kejelasan hasil pengumuman akhir kepada pelamar.', advice: 'Pertimbangkan lowongan lain jika Anda menginginkan proses seleksi dengan kepastian jadwal yang lebih ketat.' },
+    { id: 'indonesian-cloud', name: 'Indonesian Cloud', matchTerms: ['indonesian cloud'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta melaporkan kuota penerimaan riil yang diterima tidak sesuai dengan kuota formasi yang tertera di portal MagangHub.', advice: 'Harap perhitungkan bahwa jumlah peserta yang diterima berpotensi lebih sedikit dari formasi di web.' },
+    { id: 'bumi-hijau-motor', name: 'Bumi Hijau Motor (Haka Auto)', matchTerms: ['bumi hijau motor', 'haka auto'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta melaporkan kuota penerimaan aktual berbeda dengan jumlah formasi yang dibuka di portal.', advice: 'Periksa kembali detail persyaratan dan persiapkan opsi lowongan cadangan.' },
+    { id: 'kreasi-karya-bangsa', name: 'Kreasi Karya Bangsa', matchTerms: ['kreasi karya bangsa'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan ketidaksesuaian kuota peserta yang diterima dengan informasi formasi di portal.', advice: 'Persiapkan portofolio teknis Anda secara matang sebelum memilih formasi ini.' },
+    { id: 'infomedia-nusantara', name: 'PT Infomedia Nusantara', matchTerms: ['infomedia nusantara', 'pt infomedia nusantara'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta melaporkan adanya ketidaksesuaian kuota penerimaan peserta magang dengan jumlah yang tercantum di web.', advice: 'Karena jumlah pendaftar di posisi ini cukup tinggi, disarankan melamar posisi lain dengan rasio peluang lebih besar.' },
+    { id: 'yofc', name: 'Yofc International Indonesia', matchTerms: ['yofc international indonesia', 'yofc'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan jumlah penerimaan aktual tidak sebanding dengan formasi yang tertera di portal.', advice: 'Pastikan Anda memahami deskripsi pekerjaan dan lokasi penempatan sebelum mengajukan lamaran.' },
+    { id: 'great-giant-pineapple', name: 'PT Great Giant Pineapple (GGF Lampung)', matchTerms: ['great giant pineapple', 'ggf'], loc: 'lampung', category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta Batch 1 melaporkan bahwa pada unit di Lampung tidak ada pelamar yang diterima meskipun lowongan dibuka di portal.', advice: 'Disarankan untuk sangat berhati-hati sebelum menghabiskan kuota pendaftaran pada formasi ini.' },
+    { id: 'btpn-syariah', name: 'PT Bank Btpn Syariah, Tbk', matchTerms: ['btpn syariah', 'bank btpn syariah'], category: 'Kuota Tidak Sesuai', statusBadge: 'Catatan Komunitas', reportDetail: 'Peserta melaporkan beberapa divisi formasi tidak menerima kandidat pelamar yang mendaftar.', advice: 'Pastikan Anda membaca kualifikasi teknis dengan teliti dan siapkan opsi pendaftaran alternatif.' },
+    { id: 'bank-mandiri', name: 'PT Bank Mandiri (Persero) Tbk', matchTerms: ['bank mandiri', 'pt. bank mandiri'], category: 'Catatan Cabang Terkait', statusBadge: 'Catatan Komunitas', reportDetail: 'Unit Mandiri Jakarta Selatan dilaporkan oleh peserta terkait ketidaksesuaian kuota penerimaan. Lowongan di website ini tercatat di wilayah Jakarta Barat.', advice: 'Perhatikan lokasi unit kerja dan pertimbangkan rasio peluang sebelum mendaftar.' },
+    { id: 'bank-bri', name: 'PT Bank Rakyat Indonesia (Persero) Tbk', matchTerms: ['bank rakyat indonesia', 'bri'], category: 'Catatan Cabang Terkait', statusBadge: 'Catatan Komunitas', reportDetail: 'Laporan peserta menyebutkan kendala kuota formasi pada unit BRI Pusat Jaksel. Lowongan di website ini terdaftar di wilayah Jakarta Pusat.', advice: 'Dengan jumlah pendaftar ratusan orang, persiapkan asesmen teknis dan opsi cadangan secara optimal.' },
+    { id: 'bank-bni', name: 'PT Bank Negara Indonesia (Persero) Tbk', matchTerms: ['bank negara indonesia', 'bni'], category: 'Catatan Cabang Terkait', statusBadge: 'Catatan Komunitas', reportDetail: 'Beberapa kantor cabang BNI seperti Sudirman, Balikpapan, Samarinda, Serang, dan Cilegon dilaporkan tidak reach out atau ghosting. Lowongan di platform ini berlokasi di Waropen.', advice: 'Perhatikan kesesuaian lokasi domisili dan mobilitas Anda sebelum memilih cabang ini.' },
+    { id: 'bank-bsi', name: 'PT Bank Syariah Indonesia Tbk (BSI)', matchTerms: ['bank syariah indonesia', 'bsi'], category: 'Catatan Cabang Terkait', statusBadge: 'Catatan Komunitas', reportDetail: 'Beberapa area BSI seperti Malang, Serang, Bandung, Thamrin, dan Jaksel dilaporkan peserta terkait reach out atau kuota. Lowongan di platform ini berlokasi di Aceh Barat.', advice: 'Pastikan Anda mempertimbangkan lokasi penempatan sebelum mendaftar.' },
+    { id: 'loka-pom', name: 'Loka POM (Pengawas Obat dan Makanan)', matchTerms: ['loka pom'], category: 'Catatan Cabang Terkait', statusBadge: 'Catatan Komunitas', reportDetail: 'Loka POM Sijunjung (Sumatera Barat) masuk dalam daftar keluhan ghosting peserta Batch 1. Lowongan ini berlokasi di Kota Subulussalam (Aceh).', advice: 'Konfirmasi informasi kontak satuan kerja sebelum atau sesudah mengajukan berkas.' },
+    { id: 'rajawali-berdikari', name: 'PT Rajawali Berdikari Indonesia', matchTerms: ['rajawali berdikari', 'berdikari'], category: 'Perhatian Nama Serupa', statusBadge: 'Catatan Komunitas', reportDetail: 'Terdapat laporan untuk entitas dengan nama PT Berdikari pada daftar kendala reach out. Pastikan Anda memeriksa entitas perusahaan secara jelas.', advice: 'Cari informasi profil perusahaan dan proyek yang sedang dikerjakan sebelum mendaftar.' }
+  ];
+
+  function ensureJobRedflag(job) {
+    if (job.redflag) return job.redflag;
+    const cName = (job.company || '').toLowerCase();
+    const cLoc = (job.location || '').toLowerCase();
+
+    for (const rf of REDFLAGS_RULES) {
+      let matched = false;
+      for (const term of rf.matchTerms) {
+        if (term.length <= 4) {
+          if (new RegExp('\\b' + term + '\\b', 'i').test(cName)) {
+            matched = true;
+            break;
+          }
+        } else if (cName.includes(term.toLowerCase())) {
+          matched = true;
+          break;
+        }
+      }
+
+      if (matched) {
+        if (rf.loc) {
+          if (!cLoc.includes(rf.loc) && !cName.includes(rf.loc)) {
+            continue;
+          }
+        }
+        job.redflag = {
+          id: rf.id,
+          name: rf.name,
+          category: rf.category,
+          statusBadge: rf.statusBadge,
+          reportDetail: rf.reportDetail,
+          advice: rf.advice
+        };
+        return job.redflag;
+      }
+    }
+    return null;
+  }
+
   // --- API Fetching ---
   async function fetchJobs(forceRefresh = false) {
     state.isLoading = true;
@@ -109,7 +191,10 @@
       const data = await response.json();
 
       if (data && data.jobs) {
-        state.jobs = data.jobs;
+        state.jobs = data.jobs.map(j => {
+          ensureJobRedflag(j);
+          return j;
+        });
         updateGlobalStats(data);
         applyFiltersAndRender();
         if (forceRefresh) showToast('Data lowongan berhasil diperbarui!');
@@ -172,6 +257,13 @@
       list = list.filter(j => j.opportunityRate >= 50);
     } else if (state.activeOpportunity === 'medium') {
       list = list.filter(j => j.opportunityRate >= 20 && j.opportunityRate < 50);
+    }
+
+    // Community filter
+    if (state.communityFilter === 'clean') {
+      list = list.filter(j => !j.redflag);
+    } else if (state.communityFilter === 'flagged') {
+      list = list.filter(j => Boolean(j.redflag));
     }
 
     // Location filter
@@ -242,6 +334,14 @@
       el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan tersimpan`;
       el.activeFilterBadge.textContent = '⭐ Mode Favorit (Klik untuk lepas)';
       el.activeFilterBadge.style.display = 'inline-block';
+    } else if (state.communityFilter === 'flagged') {
+      el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan dengan catatan komunitas`;
+      el.activeFilterBadge.textContent = '⚠️ Catatan Komunitas Aktif (Klik untuk reset)';
+      el.activeFilterBadge.style.display = 'inline-block';
+    } else if (state.communityFilter === 'clean') {
+      el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan bebas catatan kendala`;
+      el.activeFilterBadge.textContent = '🛡️ Bebas Catatan (Klik untuk reset)';
+      el.activeFilterBadge.style.display = 'inline-block';
     } else if (state.activeOpportunity === 'high') {
       el.resultsCountText.textContent = `Menampilkan ${jobs.length} lowongan dengan Peluang Sangat Besar (>= 50%)`;
       el.activeFilterBadge.textContent = '🎯 Peluang Sangat Besar (Klik untuk lepas)';
@@ -290,7 +390,15 @@
 
       card.innerHTML = `
         <div class="card-top">
-          <span class="category-tag ${escapeHtml(job.category)}">${escapeHtml(categoryLabel)}</span>
+          <div class="card-tags-group">
+            <span class="category-tag ${escapeHtml(job.category)}">${escapeHtml(categoryLabel)}</span>
+            ${job.redflag ? `
+              <button class="badge-community-note" type="button" title="Klik untuk membaca catatan pelamar batch sebelumnya" aria-label="Lihat catatan komunitas untuk ${escapeHtml(job.company)}">
+                <span class="badge-icon" aria-hidden="true">⚠️</span>
+                <span class="badge-text">${escapeHtml(job.redflag.statusBadge || 'Catatan Komunitas')}</span>
+              </button>
+            ` : ''}
+          </div>
           <button class="card-bookmark-btn ${isSaved ? 'saved' : ''}" title="${isSaved ? 'Hapus dari favorit' : 'Simpan lowongan'}" aria-label="Simpan lowongan ${escapeHtml(job.title)}">
             ${isSaved ? '⭐' : '☆'}
           </button>
@@ -349,6 +457,14 @@
         toggleBookmark(job);
       });
 
+      const redflagBtn = card.querySelector('.badge-community-note');
+      if (redflagBtn && job.redflag) {
+        redflagBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openRedflagModal(job.redflag, job.company);
+        });
+      }
+
       const detailBtn = card.querySelector('.btn-detail');
       detailBtn.addEventListener('click', () => openModal(job));
 
@@ -402,6 +518,21 @@
     el.modalDegree.textContent = job.degree || 'Sarjana';
     el.modalSchedule.textContent = job.workDays || '5 hari/minggu';
     el.modalApplyLink.href = job.url;
+
+    // Community Alert inside Job Modal
+    if (el.modalCommunityAlert) {
+      if (job.redflag) {
+        el.modalCommunityAlert.style.display = 'block';
+        el.modalCommunityCat.textContent = job.redflag.category || 'Catatan Komunitas';
+        el.modalCommunityText.textContent = job.redflag.reportDetail || 'Instansi ini tercatat memiliki catatan kendala rekrutmen dari peserta batch sebelumnya.';
+        el.modalBtnOpenRedflagDetail.onclick = (e) => {
+          e.preventDefault();
+          openRedflagModal(job.redflag, job.company);
+        };
+      } else {
+        el.modalCommunityAlert.style.display = 'none';
+      }
+    }
 
     // Company panel initialization
     const defaultSearchUrl = job.companyWebsite || `https://www.google.com/search?q=${encodeURIComponent(job.company + ' official website')}`;
@@ -558,6 +689,33 @@
     el.jobModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     state.selectedJob = null;
+  }
+
+  // --- Dedicated Redflag Modal Logic ---
+  function openRedflagModal(redflag, companyName) {
+    if (!redflag || !el.redflagModal) return;
+
+    el.redflagCategoryPill.textContent = redflag.category || 'Catatan Rekrutmen';
+    el.redflagModalCompany.textContent = companyName || redflag.name || 'Instansi Terkait';
+    el.redflagModalDetail.textContent = redflag.reportDetail || 'Terdapat laporan kendala rekrutmen dari peserta seleksi sebelumnya.';
+    el.redflagModalAdvice.textContent = redflag.advice || 'Siapkan alternatif lamaran cadangan dan pastikan informasi kontak terkonfirmasi.';
+
+    el.redflagModal.classList.add('show');
+    el.redflagModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    if (el.redflagModalCloseBtn) {
+      el.redflagModalCloseBtn.focus();
+    }
+  }
+
+  function closeRedflagModal() {
+    if (!el.redflagModal) return;
+    el.redflagModal.classList.remove('show');
+    el.redflagModal.setAttribute('aria-hidden', 'true');
+    if (!el.jobModal || !el.jobModal.classList.contains('show')) {
+      document.body.style.overflow = '';
+    }
   }
 
   function updateModalBookmarkUI() {
@@ -722,6 +880,13 @@
       applyFiltersAndRender();
     });
 
+    if (el.filterCommunity) {
+      el.filterCommunity.addEventListener('change', (e) => {
+        state.communityFilter = e.target.value;
+        applyFiltersAndRender();
+      });
+    }
+
     // Location Select & Input
     if (el.filterLocationSelect) {
       el.filterLocationSelect.addEventListener('change', (e) => {
@@ -748,11 +913,15 @@
       }, 300);
     });
 
-    // Active filter badge click to reset location, opportunity, or bookmarks
+    // Active filter badge click to reset location, opportunity, community, or bookmarks
     el.activeFilterBadge.addEventListener('click', () => {
       if (state.showBookmarksOnly) {
         state.showBookmarksOnly = false;
         el.btnShowBookmarks.classList.remove('active');
+      } else if (state.communityFilter !== 'all') {
+        state.communityFilter = 'all';
+        if (el.filterCommunity) el.filterCommunity.value = 'all';
+        showToast('Filter catatan komunitas dinonaktifkan');
       } else if (state.activeOpportunity === 'high') {
         state.activeOpportunity = 'all';
         el.filterOpportunity.value = 'all';
@@ -779,6 +948,7 @@
       state.activeDegree = 'all';
       state.activeOpportunity = 'all';
       state.locationFilter = 'all'; // Reset returns to all national vacancies
+      state.communityFilter = 'all';
       state.searchQuery = '';
       state.showBookmarksOnly = false;
       state.sortBy = 'opportunity-desc';
@@ -787,6 +957,7 @@
       el.searchClearBtn.style.display = 'none';
       el.filterDegree.value = 'all';
       el.filterOpportunity.value = 'all';
+      if (el.filterCommunity) el.filterCommunity.value = 'all';
       if (el.filterLocationSelect) el.filterLocationSelect.value = 'all';
       el.filterLocation.style.display = 'none';
       el.filterLocation.value = '';
@@ -806,15 +977,42 @@
     el.btnResetFilters.addEventListener('click', resetAllFilters);
     el.emptyResetBtn.addEventListener('click', resetAllFilters);
 
-    // Modal Events
+    // Job Modal Events
     el.modalCloseBtn.addEventListener('click', closeModal);
     el.jobModal.addEventListener('click', (e) => {
       if (e.target === el.jobModal) closeModal();
     });
 
+    // Redflag Modal Events
+    if (el.redflagModalCloseBtn) {
+      el.redflagModalCloseBtn.addEventListener('click', closeRedflagModal);
+    }
+    if (el.redflagBtnCloseAction) {
+      el.redflagBtnCloseAction.addEventListener('click', closeRedflagModal);
+    }
+    if (el.redflagBtnFilterClean) {
+      el.redflagBtnFilterClean.addEventListener('click', () => {
+        state.communityFilter = 'clean';
+        if (el.filterCommunity) el.filterCommunity.value = 'clean';
+        closeRedflagModal();
+        applyFiltersAndRender();
+        showToast('Menyembunyikan lowongan yang memiliki catatan kendala');
+      });
+    }
+    if (el.redflagModal) {
+      el.redflagModal.addEventListener('click', (e) => {
+        if (e.target === el.redflagModal) closeRedflagModal();
+      });
+    }
+
+    // Keyboard Navigation & Escape handler
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && el.jobModal.classList.contains('show')) {
-        closeModal();
+      if (e.key === 'Escape') {
+        if (el.redflagModal && el.redflagModal.classList.contains('show')) {
+          closeRedflagModal();
+        } else if (el.jobModal && el.jobModal.classList.contains('show')) {
+          closeModal();
+        }
       }
     });
 
